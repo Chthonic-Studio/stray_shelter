@@ -1,9 +1,15 @@
 class_name AdopterProfile
 extends Resource
 
-@export var adopter_name: String = ""
-@export_enum("Apartment", "House", "Yard") var housing_type_size: String = "Apartment"
-@export var child_friendly: bool = false
-@export_range(0.0, 1.0) var patience_index: float = 0.5
-@export var preferred_temperament: PetData.Temperament
-@export var historical_income: float = 0.0
+@export_group("Adopter Bios")
+@export var adopter_name: String = "Jane Doe"
+@export var housing_type: String = "Apartment" # Apartment, House, Fenced_Yard
+@export var is_child_friendly: bool = true
+@export_range(0.0, 1.0) var patience_index: float = 0.75
+@export var monthly_income: float = 2400.0
+
+@export_group("Preferences")
+@export var preferred_species: int = 0 # Match with PetData.Species DOG
+@export var preferred_temperament: int = 1 # Match with PetData.Temperament PLAYFUL
+@export var max_acceptable_age_months: float = 60.0
+@export var willing_to_treat_sick: bool = false

@@ -1,53 +1,80 @@
 extends Node
 
-@export var bed_state: GardenBed
-# Soil hydration depletion rate 
-@export var moisture_degradation_rate: float = 0.1
+# AutoLoad name registers as: BackyardManager
+signal garden_updated()
+signal crop_ripe(index: int, crop_type: String)
 
-var garden_patches: Dictionary = {} # index: GardenBedState
+@export var max_beds_count: int = 6
+var garden_database: Dictionary = {} # contains [int index]: GardenBed resource
 
-func initialize_garden_beds(beds_count: int) -> void:
-	for i in range(beds_count):
+@export_group("Raw Inventories")
+var raw_wood: int = 15
+var raw_string_cord: int = 12
+var harvested_herbs: Dictionary = { "Catnip": 0, "Beets": 0, "Chamomile": 0 }
+
+func _ready() -> void:
+	initialize_backyard_patches()
+
+func initialize_backyard_patches() -> void:
+	for i in range(max_beds_count):
 		var bed = GardenBed.new()
 		bed.seed_type = "Empty"
-		bed.stage = 0.0
-		bed.soil_moisture = 50.0
-		bed.organic_yield = 0
-		garden_patches[i] = bed
+		bed.soil_moisture = 45.0
+		bed.growth_ratio = 0.0
+		garden_database[i] = bed
 
-func process_farming_ticks(delta: float) -> void:
-	for bed_idx in garden_patches:
-		var bed: GardenBed = garden_patches[bed_idx]
-		if bed.seed_type == "Empty": continue
-		
-		# Slowly lower soil moisture levels
-		bed.soil_moisture = clampf(bed.soil_moisture - moisture_degradation_rate * delta * 5.0, 0.0, 100.0)
-		
-		# Growing logic dependent on moisture
-		if bed.soil_moisture > 20.0:
-			bed.stage = clampf(bed.stage + 0.05 * delta, 0.0, 3.0)
+func plant_crop_seed(index: int, type: String) -> void:
+	if garden_database.has(index):
+		var bed: GardenBed = garden_database[index]
+		bed.seed_type = type
+		bed.growth_ratio = 0.0
+		bed.soil_moisture = 60.0 # pre-watered on plant
+		bed.is_harvestable = false
+		emit_signal("garden_updated")
+
+func water_patch_index(index: int) -> void:
+	if garden_database.has(index):
+		var bed: GardenBed = garden_database[index]
+		bed.water_bed(35.0)
+		emit_signal("garden_updated")
+
+func tick_farming_simulation(delta_hours: float) -> void:
+	for key in garden_database.keys():
+		var bed: GardenBed = garden_database[key]
+		if bed.seed_type == "Empty":
+			continue
 			
-		# Damp weed overgrow chances if heavily watered
-		if bed.soil_moisture > 85.0:
-			bed.organic_yield = clampi(bed.organic_yield - 1, 0, 10)
-
-func water_bed(bed_idx: int) -> void:
-	if garden_patches.has(bed_idx):
-		var bed: GardenBed = garden_patches[bed_idx]
-		bed.soil_moisture = clampf(bed.soil_moisture + 40.0, 0.0, 100.0)
-
-# Enrichment Crafting Panel
-# Creating Toys triggers items needed for Pet Play configurations
-func craft_enrichment_toy(wood_required: int, thread_required: int, inv_materials: Dictionary) -> Dictionary:
-	if inv_materials.get("wood", 0) >= wood_required and inv_materials.get("thread", 0) >= thread_required:
-		inv_materials["wood"] -= wood_required
-		inv_materials["thread"] -= thread_required
+		var was_ripe = bed.is_harvestable
+		bed.step_growth_simulation(delta_hours)
 		
-		# Return crafted Toy and residual inventories
-		return {
-			"success": true,
-			"toy_type": "Fleece Chew Knot" if thread_required > 3 else "Wooden Puzzle Roller",
-			"enrichment_value": 35.0, # boosts pet enrichment vitals
-			"updated_inventory": inv_materials
-		}
-	return { "success": false, "reason": "Insufficient crafting materials." }
+		if bed.is_harvestable and not was_ripe:
+			emit_signal("crop_ripe", key, bed.seed_type)
+			
+	emit_signal("garden_updated")
+
+func harvest_patch_index(index: int) -> bool:
+	if not garden_database.has(index): return false
+	var bed: GardenBed = garden_database[index]
+	if not bed.is_harvestable: return false
+	
+	var yield_val = bed.quantity_yield
+	if harvested_herbs.has(bed.seed_type):
+		harvested_herbs[bed.seed_type] += yield_val
+	else:
+		harvested_herbs[bed.seed_type] = yield_val
+		
+	# Reset Bed
+	bed.seed_type = "Empty"
+	bed.growth_ratio = 0.0
+	bed.is_harvestable = false
+	bed.quantity_yield = 0
+	
+	emit_signal("garden_updated")
+	return true
+
+func craft_toy(wood_spent: int, thread_spent: int, toy_product: String) -> bool:
+	if raw_wood >= wood_spent and raw_string_cord >= thread_spent:
+		raw_wood -= wood_spent
+		raw_string_cord -= thread_spent
+		return true
+	return false

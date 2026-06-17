@@ -1,59 +1,66 @@
-class_name AdoptionCenter
 extends Node
 
-# Score modifiers
-const AGE_PREFERENCE_PASS: float = 15.0
-const TEMPERAMENT_PASS: float = 25.0
-const DIETARY_PASS: float = 20.0
+# AutoLoad name registers as: AdoptionManager
+signal adoption_finalized(pet_data: PetData, adopter: AdopterProfile)
+signal adoption_returned(pet_data: PetData, reason: String)
 
-func calculate_match_score(pet: PetData, adopter: AdopterProfile) -> float:
-	var base_score: float = 100.0
+func calculate_compatibility_compatibility(pet: PetData, adopter: AdopterProfile) -> float:
+	if not pet or not adopter:
+		return 0.0
+		
+	var rating: float = 100.0
 	
-	# Compatibility 1: Temperament Match 
+	# check 1: Species preferred match
+	if pet.species != adopter.preferred_species:
+		rating -= 20.0
+		
+	# check 2: Temperament compatibility
 	if pet.temperament == adopter.preferred_temperament:
-		base_score += TEMPERAMENT_PASS
+		rating += 15.0
 	else:
-		base_score -= 15.0
+		rating -= 15.0
 		
-	# Compatibility 2: Specific dietary/health check vs Adopter historical budget
-	if pet.is_sick and adopter.historical_income < 3000.0:
-		# Sickness medical expenses requires higher finances
-		base_score -= 30.0
+	# check 3: Chronically ill vs. adopter budget
+	if pet.is_sick:
+		if not adopter.willing_to_treat_sick:
+			rating -= 40.0
+		if adopter.monthly_income < 3000.0:
+			rating -= 25.0 # can't support veterinary medical bills
+			
+	# check 4: High active energy vs. tight apartment housing bounds
+	if pet.energy > 80.0 and adopter.housing_type == "Apartment":
+		rating -= 30.0
 		
-	# Compatibility 3: Pet energy levels vs Adopter environment
-	if pet.energy > 80.0 and adopter.housing_type_size == "Apartment":
-		# Energetic pets suffer in small apartments!
-		base_score -= 25.0
+	# check 5: Anxious animal with noisy households (children)
+	if pet.temperament == PetData.Temperament.ANXIOUS and adopter.is_child_friendly:
+		rating -= 15.0
 		
-	# Compatibility 4: Anxious pets with wild family children
-	if pet.temperament == PetData.Temperament.ANXIOUS and adopter.child_friendly:
-		base_score -= 20.0
-		
-	return clampf(base_score, 0.0, 100.0)
+	return clampf(rating, 0.0, 100.0)
 
-# Trigger post-adoption survey queues
-func simulate_post_adoption_wellbeing(match_score: float) -> Dictionary:
-	var rand_roll: float = randf() * 100.0
-	var returned_to_shelter: bool = false
-	var comments: String = "Living happy and content!"
-	
-	# Match quality dictates returned chances
-	if match_score < 45.0:
-		# High probability (60%) of return if poor match
-		if rand_roll < 60.0:
-			returned_to_shelter = true
-			comments = "The pet was highly anxious and destroyed my furniture; my apartment is too noisy."
-		else:
-			comments = "Struggling but keeping them safely."
-			
-	elif match_score >= 45.0 and match_score < 75.0:
-		if rand_roll < 15.0:
-			returned_to_shelter = true
-			comments = "Unfortunately, we didn't bond well with the animal. Returning them."
-		else:
-			comments = "Doing well. The training takes work but we are fully committed."
-			
-	return {
-		"returned": returned_to_shelter,
-		"status_report": comments
+func process_placement_decision(pet: PetData, adopter: AdopterProfile) -> Dictionary:
+	var score: float = calculate_compatibility_compatibility(pet, adopter)
+	var processed_data: Dictionary = {
+		"eligible": score >= 50.0,
+		"score": score,
+		"notes": "Adoption matching rate acceptable!"
 	}
+	
+	if score < 50.0:
+		processed_data["notes"] = "Unsatisfactory. Adopter lacks appropriate yard space or budget for pet needs."
+	elif score >= 85.0:
+		processed_data["notes"] = "Sought match! The household perfectly complements the animal's needs."
+		
+	return processed_data
+
+func trigger_weekly_wellbeing_survey(pet: PetData, adopter: AdopterProfile) -> void:
+	var score: float = calculate_compatibility_compatibility(pet, adopter)
+	var random_roll: float = randf() * 100.0
+	
+	# Lower scores increase return probability
+	if score < 45.0:
+		if random_roll < 65.0:
+			# Returned to shelter!
+			emit_signal("adoption_returned", pet, "Returned: Adopter reported severe behavioral compatibility struggles.")
+	elif score < 75.0:
+		if random_roll < 12.0:
+			emit_signal("adoption_returned", pet, "Returned: Family circumstances shifted suddenly.")

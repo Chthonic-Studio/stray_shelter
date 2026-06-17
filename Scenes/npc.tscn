@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://bsn2ajuel4jey"]
+
+[node name="Npc" type="CharacterBody2D" unique_id=1281956564]
