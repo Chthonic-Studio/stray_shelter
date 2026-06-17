@@ -1,11 +1,9 @@
 class_name Worker
 extends Entity
 
-@export var worker_stats: WorkerStats
+@export var worker_data: WorkerData
 
-func _initialize_entity() -> void:
-	data_profile = worker_stats
-	if worker_stats:
-		# Example: override base_speed dynamically from your Resource files
-		if "movement_speed" in worker_stats:
-			base_speed = worker_stats.movement_speed
+func _ready() -> void:
+	if not worker_data:
+		push_warning("Worker node '", name, "' is missing WorkerData!")
+		return

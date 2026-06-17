@@ -1,4 +1,4 @@
-class_name WorkerStats
+class_name WorkerData
 extends Resource
 
 enum EmployeeRole { CARETAKER, VETERINARIAN, CLEANER, RECEPTIONIST }

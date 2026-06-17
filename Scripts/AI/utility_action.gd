@@ -1,63 +1,21 @@
-class_name UtilityAction
 extends Node
+class_name UtilityAction
 
-enum CombiningMethod { MULTIPLY, AVERAGE, ADDITIVE_CLAMP }
+@export var action_name: String = "Idle"
+@export var considerations: Array[NodePath]
 
-@export var action_name: String = "Action"
-@export var base_weight: float = 1.0
-@export var combining_method: CombiningMethod = CombiningMethod.MULTIPLY
-@export var target_location: Vector2
+func evaluate() -> float:
+	var score = 1.0
+	for consideration_path in considerations:
+		var consideration = get_node(consideration_path) as UtilityConsideration
+		if consideration:
+			score *= consideration.evaluate()
+	return score
 
-@onready var actor: Entity = get_owner() as Entity
-
-func is_executable() -> bool:
+# Returns true if the action is completed, false if it's still running
+func execute(entity: Node, delta: float) -> bool:
+	print("Executing action: ", action_name, " on ", entity.name)
+	
+	# By default, actions complete immediately. 
+	# Overriding scripts should return false to keep the action running across multiple frames.
 	return true
-
-func enter(entity: CharacterBody2D) -> void:
-	# Code to trigger entity animation & pathfinding target
-	pass
-
-func execute_tick(entity: CharacterBody2D, delta: float) -> void:
-	# Run continuous processes (eating, sleeping animation steps)
-	pass
-
-func exit() -> void:
-	pass
-
-func move(destination: Vector2) -> void:
-	actor.move_to_destination(destination)
-
-func evaluate_action(entity: CharacterBody2D) -> float:
-	var considerations: Array[Node] = get_children()
-	if considerations.is_empty():
-		return base_weight
-
-	var scores: Array[float] = []
-	for node in considerations:
-		if node is UtilityConsideration:
-			scores.append(node.get_score(entity))
-
-	if scores.is_empty():
-		return 0.0
-
-	var final_score: float = 1.0
-	match combining_method:
-		CombiningMethod.MULTIPLY:
-			# If any critical need is 0, the final score becomes 0
-			for s in scores:
-				final_score *= s
-			final_score *= base_weight
-			
-		CombiningMethod.AVERAGE:
-			var sum: float = 0.0
-			for s in scores:
-				sum += s
-			final_score = (sum / scores.size()) * base_weight
-			
-		CombiningMethod.ADDITIVE_CLAMP:
-			var sum: float = 0.0
-			for s in scores:
-				sum += s
-			final_score = clampf(sum, 0.0, 1.0) * base_weight
-
-	return final_score

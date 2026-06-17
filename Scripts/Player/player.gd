@@ -2,21 +2,19 @@ class_name PlayerController
 extends CharacterBody2D
 
 signal interaction_triggered(interactive_node: Node)
-signal ui_toggle_requested(window_name: String)
 
 @export_category("Locomotion")
 @export var movement_speed: float = 145.0
 @export var acceleration: float = 0.35
 
-
 @export_category("Interaction Configuration")
 @export var reach_distance: float = 32.0
 
 @onready var interaction_cast: RayCast2D = $InteractionRayCast
-@onready var sprite: Sprite2D = $Sprite2D
-@onready var anim_player: AnimationPlayer = $AnimationPlayer
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 var current_held_item: Dictionary = {}
+var facing_direction: String = "down" # Tracks the last direction faced
 
 func _physics_process(_delta: float) -> void:
 	# 1. Capture keyboard input mapping directionals
@@ -28,10 +26,11 @@ func _physics_process(_delta: float) -> void:
 	if input_vector != Vector2.ZERO:
 		velocity = velocity.lerp(input_vector * movement_speed, acceleration)
 		update_interaction_direction(input_vector)
-		play_movement_animation(true)
+		update_facing_direction(input_vector)
+		play_animation("walk")
 	else:
 		velocity = velocity.lerp(Vector2.ZERO, 0.45)
-		play_movement_animation(false)
+		play_animation("idle")
 		
 	# 3. Godot 4.6 standard safe locomotion call
 	move_and_slide()
@@ -43,13 +42,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 	# Quick-access bound hotkeys for modular viewport windows
 	if event.is_action_pressed("toggle_garden_menu"):
-		ui_toggle_requested.emit("garden")
+		UIManager.toggle_menu_window("garden")
 	elif event.is_action_pressed("toggle_vet_ops"):
-		ui_toggle_requested.emit("veterinary")
+		UIManager.toggle_menu_window("veterinary")
 	elif event.is_action_pressed("toggle_staff_payroll"):
-		ui_toggle_requested.emit("staff_payroll")
+		UIManager.toggle_menu_window("staff_payroll")
 	elif event.is_action_pressed("toggle_crafting"):
-		ui_toggle_requested.emit("crafting")
+		UIManager.toggle_menu_window("crafting")
+	elif event.is_action_pressed("toggle_inventory"):
+		UIManager.toggle_menu_window("inventory")
 
 func update_interaction_direction(direction: Vector2) -> void:
 	if interaction_cast:
@@ -57,21 +58,22 @@ func update_interaction_direction(direction: Vector2) -> void:
 		# Rotate interaction ray visual assist
 		interaction_cast.rotation = direction.angle() - PI/2
 
-func play_movement_animation(is_moving: bool) -> void:
-	if not anim_player: return
-	
-	if is_moving:
-		# Check direction quadrant to select appropriate sprite sheet frames
-		if abs(velocity.x) > abs(velocity.y):
-			sprite.flip_h = velocity.x < 0
-			anim_player.play("walk_sideways")
-		else:
-			if velocity.y < 0:
-				anim_player.play("walk_up")
-			else:
-				anim_player.play("walk_down")
+func update_facing_direction(direction: Vector2) -> void:
+	# Check direction quadrant to update our facing state string
+	if abs(direction.x) > abs(direction.y):
+		facing_direction = "sideways"
+		# Flip the sprite based on whether we are moving left or right
+		sprite.flip_h = direction.x < 0
 	else:
-		anim_player.play("idle")
+		if direction.y < 0:
+			facing_direction = "up"
+		else:
+			facing_direction = "down"
+
+func play_animation(base_animation_name: String) -> void:
+	# Dynamically construct the animation name (e.g. "idle_down", "pickup_sideways")
+	var full_anim_name = base_animation_name.to_lower() + "_" + facing_direction
+	sprite.play(full_anim_name)
 
 func trigger_raycast_interaction() -> void:
 	if not interaction_cast or not interaction_cast.is_colliding():
