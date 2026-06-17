@@ -6,6 +6,9 @@ enum CombiningMethod { MULTIPLY, AVERAGE, ADDITIVE_CLAMP }
 @export var action_name: String = "Action"
 @export var base_weight: float = 1.0
 @export var combining_method: CombiningMethod = CombiningMethod.MULTIPLY
+@export var target_location: Vector2
+
+@onready var actor: Entity = get_owner() as Entity
 
 func is_executable() -> bool:
 	return true
@@ -20,6 +23,9 @@ func execute_tick(entity: CharacterBody2D, delta: float) -> void:
 
 func exit() -> void:
 	pass
+
+func move(destination: Vector2) -> void:
+	actor.move_to_destination(destination)
 
 func evaluate_action(entity: CharacterBody2D) -> float:
 	var considerations: Array[Node] = get_children()

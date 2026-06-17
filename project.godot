@@ -21,6 +21,7 @@ GameManager="*uid://bghwanb4hy40c"
 PetManager="*uid://cf8xqg2envx4r"
 BackyardManager="*uid://deu8st77atifr"
 AdoptionManager="*uid://bavivw5bjsq5p"
+LocalPathfinder="*uid://w3fkf7tg8loy"
 
 [display]
 

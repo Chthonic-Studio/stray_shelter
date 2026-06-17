@@ -8,6 +8,7 @@ signal ui_toggle_requested(window_name: String)
 @export var movement_speed: float = 145.0
 @export var acceleration: float = 0.35
 
+
 @export_category("Interaction Configuration")
 @export var reach_distance: float = 32.0
 
