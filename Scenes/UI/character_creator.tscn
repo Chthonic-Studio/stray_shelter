@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://dt8mkvac6atl6"]
+
+[ext_resource type="Script" uid="uid://kshdgiv76rxj" path="res://Scripts/UI/character_creation_ui.gd" id="1_ieiwf"]
+
+[node name="CharacterCreator" type="Control" unique_id=1084305494]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ieiwf")
+metadata/_edit_use_anchors_ = true
+
+[node name="BackgroundColor" type="ColorRect" parent="." unique_id=177991546]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.41, 0.41, 0.41, 1)
+
+[node name="MainLayout" type="HBoxContainer" parent="." unique_id=1192724836]
+custom_minimum_size = Vector2(560, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0625
+anchor_top = 0.083333336
+anchor_right = 0.9375
+anchor_bottom = 0.9166667
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+metadata/_edit_use_anchors_ = true
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainLayout" unique_id=755600288]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="TitleLabel" type="Label" parent="MainLayout/LeftPanel" unique_id=515159203]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="NameSection" type="VBoxContainer" parent="MainLayout/LeftPanel" unique_id=1457178737]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainLayout/LeftPanel/NameSection" unique_id=1465427938]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Enter name"
+horizontal_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="MainLayout/LeftPanel/NameSection" unique_id=450150083]
+layout_mode = 2
+
+[node name="PronounSection" type="VBoxContainer" parent="MainLayout/LeftPanel" unique_id=860778236]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainLayout/LeftPanel/PronounSection" unique_id=1589071626]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Choose your pronouns"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="MainLayout/LeftPanel/PronounSection" unique_id=567003924]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "He/Him"
+popup/item_0/id = 0
+popup/item_1/text = "She/Her"
+popup/item_1/id = 1
+popup/item_2/text = "They/Them"
+popup/item_2/id = 2
+
+[node name="PreviewPanel" type="VBoxContainer" parent="MainLayout" unique_id=444014067]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PreviewBG" type="ColorRect" parent="MainLayout/PreviewPanel" unique_id=30223091]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.78039217, 1, 1, 0.58431375)
+
+[node name="RightPanel" type="VBoxContainer" parent="MainLayout" unique_id=1944314354]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="TitleLabel" type="Label" parent="MainLayout/RightPanel" unique_id=189657998]
+layout_mode = 2
+horizontal_alignment = 1

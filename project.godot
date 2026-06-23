@@ -18,10 +18,14 @@ config/icon="res://icon.svg"
 
 UIManager="*uid://ca04jfa16mfnh"
 GameManager="*uid://bghwanb4hy40c"
+TimeManager="*uid://dpb2ewppgqr1a"
 PetManager="*uid://cf8xqg2envx4r"
 BackyardManager="*uid://deu8st77atifr"
 AdoptionManager="*uid://bavivw5bjsq5p"
 LocalPathfinder="*uid://w3fkf7tg8loy"
+InventoryManager="*uid://ce5ib2ii5i1wx"
+EconomyManager="*uid://bkd8rclvnji7j"
+JobManager="*uid://ch1i2liuulesf"
 
 [display]
 
