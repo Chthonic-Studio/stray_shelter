@@ -168,7 +168,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_8erm5")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_down",
 "speed": 5.0
 }, {
@@ -191,7 +191,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_7dp3o")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_sideways",
 "speed": 5.0
 }, {
@@ -214,7 +214,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_l6n3p")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle_up",
 "speed": 5.0
 }, {
@@ -237,9 +237,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_0gysh")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_down",
-"speed": 5.0
+"speed": 15.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -260,9 +260,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_wohnl")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_sideways",
-"speed": 5.0
+"speed": 15.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -283,16 +283,24 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_qpa8y")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_up",
-"speed": 5.0
+"speed": 15.0
 }]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kar4v"]
+height = 24.0
 
 [node name="Player" type="CharacterBody2D" unique_id=493502790]
 script = ExtResource("1_v0iea")
+movement_speed = 200.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1666984627]
 sprite_frames = SubResource("SpriteFrames_sbwqj")
 animation = &"walk_up"
 
 [node name="InteractionRayCast" type="RayCast2D" parent="." unique_id=1554770739]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1999973544]
+position = Vector2(0, 21)
+shape = SubResource("CapsuleShape2D_kar4v")
